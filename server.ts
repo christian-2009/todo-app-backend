@@ -31,6 +31,38 @@ app.get("/", async (req, res) => {
   res.json(response);
 });
 
+app.post('/todo', async (req, res) => {
+  try {
+    const {todoBody , todoTitle} = req.body
+    const response = await client.query('insert into todo (todo_body, todo_title) values ($1, $2) returning *', [todoBody, todoTitle])
+    res.status(200).json(response.rows)
+  }catch(error) {
+    res.status(400)
+    console.error(error)
+  }
+})
+
+app.get('/todo', async (req, res) => {
+  try {
+    const response = await client.query('select * from todo order by id desc')
+    res.status(200).json(response.rows)
+  }catch(error){
+    res.status(400).send(error)
+    console.error(error)
+  }
+})
+
+app.delete('/todo/:id', async (req, res) => {
+  try{
+    const {id} = req.params
+    const response = await client.query('delete from todo where id = $1 returning *', [id])
+    res.status(200).json(response.rows)
+  }catch(error){
+    res.status(400).send(error)
+  }
+})
+
+
 
 //Start the server on the given port
 const port = process.env.PORT;
